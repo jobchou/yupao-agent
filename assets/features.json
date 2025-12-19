@@ -1,47 +1,1210 @@
 [
   {
-    "id": 1,
-    "chinese_name": "近30天登录次数",
-    "english_name": "login_count_30d",
-    "definition": "用户在过去30天内成功登录平台的次数",
-    "sql_logic": "SELECT user_id, COUNT(*) as login_count FROM login_log WHERE login_time >= CURRENT_DATE - INTERVAL '30 days' GROUP BY user_id",
-    "category": "行为特征",
-    "tags": ["登录", "活跃度"]
+    "字段名称": "role_type_2c",
+    "字段中文": "二分类角色标签（只有老板和工人）",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "基于用户在平台行为模型进行判断用户角色是老板还是工人",
+    "涉及sql逻辑": "SELECT user_id, role_type_2c FROM yuapo.ods_user_role_label WHERE p_date = MAX_PT('yuapo.ods_user_role_label')"
   },
   {
-    "id": 2,
-    "chinese_name": "累计消费金额",
-    "english_name": "total_spent",
-    "definition": "用户历史累计消费总金额（人民币）",
-    "sql_logic": "SELECT user_id, SUM(amount) as total_spent FROM orders WHERE status = 'completed' GROUP BY user_id",
-    "category": "交易特征",
-    "tags": ["消费", "金额"]
+    "字段名称": "last_login_time",
+    "字段中文": "最后一次登录时间",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "通过查询用户的登录日志表，找到每个用户最新的登录记录，并提取该记录的登录时间",
+    "涉及sql逻辑": "SELECT user_id, add_time AS last_login_time, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY add_time DESC) AS rk FROM yuapo.ods_member_login_log_formal WHERE pt >= '202005' AND user_id != 0"
   },
   {
-    "id": 3,
-    "chinese_name": "最近一次登录时间",
-    "english_name": "last_login_time",
-    "definition": "用户最近一次成功登录的时间戳",
-    "sql_logic": "SELECT user_id, MAX(login_time) as last_login_time FROM login_log GROUP BY user_id",
-    "category": "行为特征",
-    "tags": ["登录", "最近"]
+    "字段名称": "max_label_score_gz_p_name",
+    "字段中文": "用户身上最高分一级工种名称",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "基于用户的行为数据根据行为权重分算出一个最高分工种",
+    "涉及sql逻辑": ""
   },
   {
-    "id": 4,
-    "chinese_name": "注册渠道",
-    "english_name": "register_channel",
-    "definition": "用户注册时来源渠道，如：应用商店、广告投放、自然流量等",
-    "sql_logic": "SELECT user_id, channel as register_channel FROM users",
-    "category": "属性特征",
-    "tags": ["渠道", "注册"]
+    "字段名称": "tail_user_id",
+    "字段中文": "用户ID尾号",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "用户ID后一位",
+    "涉及sql逻辑": ""
   },
   {
-    "id": 5,
-    "chinese_name": "月活跃天数",
-    "english_name": "active_days_30d",
-    "definition": "用户在过去30天内有多少天有登录行为",
-    "sql_logic": "SELECT user_id, COUNT(DISTINCT DATE(login_time)) as active_days FROM login_log WHERE login_time >= CURRENT_DATE - INTERVAL '30 days' GROUP BY user_id",
-    "category": "行为特征",
-    "tags": ["活跃", "天数"]
+    "字段名称": "reg_time",
+    "字段中文": "注册时间",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "用户（member表）表的注册时间",
+    "涉及sql逻辑": "SELECT id, time FROM yuapo.ods_member WHERE pt = '20210807'"
+  },
+  {
+    "字段名称": "max_label_score_gz_sub_name",
+    "字段中文": "用户身上最高分二级工种名称",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "基于用户的行为数据根据行为权重分算出一个最高分工种，并查到它对应的二级工种",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "register_ts",
+    "字段中文": "用户注册时间",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户的注册时间",
+    "涉及sql逻辑": "SELECT register_ts FROM user_base_info"
+  },
+  {
+    "字段名称": "user_id",
+    "字段中文": "用户ID",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户唯一ID",
+    "涉及sql逻辑": "SELECT user_id FROM user_base_info"
+  },
+  {
+    "字段名称": "role_type_3c",
+    "字段中文": "三分类角色标签（有老板和工人和两者都是）",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "基于用户在平台行为模型进行判断用户角色是老板/工人/双重身份",
+    "涉及sql逻辑": "SELECT user_id, role_type_3c FROM yuapo.ods_user_role_label WHERE p_date = MAX_PT('yuapo.ods_user_role_label')"
+  },
+  {
+    "字段名称": "cur_role",
+    "字段中文": "当前用户角色",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "app中用户切换角色",
+    "涉及sql逻辑": "SELECT user_id, cur_role FROM yuapo.dim_user_da"
+  },
+  {
+    "字段名称": "vip_card_status",
+    "字段中文": "VIP状态",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "当用户的会员类型为 1002 时，若会员过期时间（endTime）大于当前时间加 2 秒（业务要求的延迟判断），则状态为 1（有效），否则为 2（无效）",
+    "涉及sql逻辑": "SELECT uid, CASE WHEN end_time > to_timestamp(EXTRACT(EPOCH FROM NOW()) + 2) THEN 1 ELSE 2 END AS vip_card_status FROM public.ods_vip_membership WHERE vip_type = 1002"
+  },
+  {
+    "字段名称": "label_v3_sub_gz_id",
+    "字段中文": "用户标签V3最高分二级工种",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户身上最高分工种对应的二级工种",
+    "涉及sql逻辑": "SELECT user_id, row_rank, sub_gz_id FROM yuapo.dws_day_user_label_gz_v3_df WHERE pt = '20251202' AND row_rank = 1"
+  },
+  {
+    "字段名称": "last_act_ds",
+    "字段中文": "用户末次登录日期",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "根据用户生命周期行为汇总表里看用户末次活跃日期",
+    "涉及sql逻辑": "SELECT user_id, last_act_ds FROM yuapo.dws_user_lifecycle_behavior_df WHERE ds = MAX_PT('yuapo.dws_user_lifecycle_behavior_df')"
+  },
+  {
+    "字段名称": "pay_money",
+    "字段中文": "充值金额",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "从支付订单里统计用户支付成功的金额总额",
+    "涉及sql逻辑": "SELECT SUM(order_price) AS pay_money, MAX(ts) AS last_pay_time, MIN(ts) AS fst_pay_ts, user_id FROM yuapo.dwd_deal_pay_order_da WHERE order_status_id = 2 GROUP BY user_id"
+  },
+  {
+    "字段名称": "tail_user_id",
+    "字段中文": "尾号",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户id尾号",
+    "涉及sql逻辑": "SELECT user_id, MOD(ABS(user_id), 1000) AS tail_user_id FROM user_central.ods_enterprise_base_info WHERE deleted = 0"
+  },
+  {
+    "字段名称": "id_card_status",
+    "字段中文": "实名状态",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户的身份证认证状态-1:不通过,0:未认证,1:审核中,2:已通过",
+    "涉及sql逻辑": "SELECT user_id, enterprise_status FROM user_central.ods_user_result WHERE tenant_key = 'YPZP' AND deleted = 0"
+  },
+  {
+    "字段名称": "user_tail_2_id",
+    "字段中文": "用户ID后2位尾号",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户ID后两位",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "issued_resume",
+    "字段中文": "是否发布招工",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "从招工表看用户是否历史有发布岗位信息数，有一条就是是，没有就是否",
+    "涉及sql逻辑": "SELECT user_id, COUNT(rctm_id) issue_all_qty FROM yuapo.dim_rctm_da WHERE is_check_id = 2 AND user_id > 0 GROUP BY user_id"
+  },
+  {
+    "字段名称": "lgst_vip_status",
+    "字段中文": "物流会员状态",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "很早之前会员单品里看物流会员状态（会员截止时间跟当前时间判断）",
+    "涉及sql逻辑": "order_info.ext_info.membershipExtInfo.vipGroup = 26"
+  },
+  {
+    "字段名称": "user_status",
+    "字段中文": "用户状态",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "用户（member表）表的状态（status）",
+    "涉及sql逻辑": "SELECT id, status FROM yuapo.ods_member WHERE pt = '20210807'"
+  },
+  {
+    "字段名称": "vip_sub_status",
+    "字段中文": "会员次卡状态",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "判断vipType = 1003的 VIP 类型生效，属于特定类型 VIP 的订阅状态标识",
+    "涉及sql逻辑": "SELECT uid, CASE WHEN (EXTRACT(EPOCH FROM end_time) * 1000)::BIGINT > (EXTRACT(EPOCH FROM NOW()) * 1000 + 2000)::BIGINT THEN 1 ELSE 2 END AS vip_sub_status FROM public.ods_vip_membership WHERE vip_type = 1003"
+  },
+  {
+    "字段名称": "user_status",
+    "字段中文": "用户账号状态",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "当前的用户状态",
+    "涉及sql逻辑": "SELECT id, status FROM public.ods_member"
+  },
+  {
+    "字段名称": "pay_money_total",
+    "字段中文": "充值金额",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "统计老php和java现在的充值记录",
+    "涉及sql逻辑": "order_info 和 jc_pay合并数据"
+  },
+  {
+    "字段名称": "cur_role",
+    "字段中文": "当前用户角色",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "判断用户当前是在老板的页面还是工人的页面",
+    "涉及sql逻辑": "SELECT user_id, now_role FROM user_central.ods_user_role"
+  },
+  {
+    "字段名称": "cur_version",
+    "字段中文": "当前使用APP版本",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "php member_app_q中的当前版本信息",
+    "涉及sql逻辑": "SELECT user_id, cur_version FROM yuapo.ods_member_app_q WHERE pt = '20210807'"
+  },
+  {
+    "字段名称": "highest_gz_label_mode",
+    "字段中文": "老板最高的工种标签用工模式",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "基于用户的老板行为数据根据行为权重分算出一个最高分工种，并关联出工种对应的用工模式",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "is_actv_1_mo",
+    "字段中文": "是否最近一个月活跃",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "从用户登录表中看近1个月用户是否在登陆表有记录",
+    "涉及sql逻辑": "SELECT user_id FROM yuapo.ods_member_login_log_formal WHERE pt >= substr(replace(add_months(GETDATE(), -2), '-', ''), 1, 6) AND DATEDIFF(GETDATE(), FROM_UNIXTIME(add_time)) <= 30 AND user_id != 0 GROUP BY user_id"
+  },
+  {
+    "字段名称": "last_login_source",
+    "字段中文": "最后一次登录来源",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "从用户登录表中看用户最后一次登录来源",
+    "涉及sql逻辑": "SELECT user_id, add_time AS last_login_time, city AS last_login_city, CASE WHEN source = 'android' THEN '安卓' WHEN source = 'ios' THEN 'IOS' WHEN source = 'computer' THEN 'PC' WHEN source IN ('wechat', 'wxeab419e6410936e2') THEN 'm端微信内' WHEN source IN ('wechat_h5', 'h5_mobile', 'mnotiswechat') THEN 'm端微信外' WHEN source = 'baidu' OR source LIKE 'wx%' THEN '小程序' ELSE '其他' END AS last_login_source, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY add_time DESC) AS rk FROM yuapo.ods_member_login_log_formal WHERE pt >= '202005' AND user_id != 0"
+  },
+  {
+    "字段名称": "connect_bylink_value_td",
+    "字段中文": "截止累计联系传递价值",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计每个用户在业务日期当天的总联系传递价值，该价值由工人端和老板端的联系传递价值相加得出",
+    "涉及sql逻辑": "SELECT user_id, SUM(IF(ds = '${bizdate}', total_bylink_worker_value + total_bylink_boss_value, 0)) connect_bylink_value_td FROM yuapo.dws_user_value_di WHERE ds >= '${120daysago}' GROUP BY user_id"
+  },
+  {
+    "字段名称": "is_manual_issue_resume",
+    "字段中文": "是否手动发布过简历离线",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户自发简历数量，有就是发过，没有就没发过",
+    "涉及sql逻辑": "SELECT user_id, SUM(IF(status = 1, 1, 0)) manual_issue_resume_cnt FROM yuapo.ods_resume_basic WHERE pt = '20210807' GROUP BY user_id"
+  },
+  {
+    "字段名称": "credibility_label_ids",
+    "字段中文": "用户身上所有信誉标签",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "统计用户身上所有的信誉标签",
+    "涉及sql逻辑": "SELECT user_id, STRING_AGG(DISTINCT lab_id::TEXT, ',') AS credibility_label_ids FROM gateway.label_match_record WHERE lab_type = '7' AND act_cnt != '0' AND custom != '1'"
+  },
+  {
+    "字段名称": "vip_status",
+    "字段中文": "会员状态",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "去判断用户会员卡状态vip_type=1002是否到期",
+    "涉及sql逻辑": "vip_type=1002"
+  },
+  {
+    "字段名称": "has_buy_lgst_region_vip",
+    "字段中文": "是否购买物流专区会员",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "很早之前会员单品里看是否购买物流专区会员",
+    "涉及sql逻辑": "order_info.ext_info.membershipExtInfo.vipGroup = 26"
+  },
+  {
+    "字段名称": "issue_all_qty",
+    "字段中文": "发布招工条数",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "汇总统计用户发布审核通过的招工信息总条数",
+    "涉及sql逻辑": "SELECT user_id, COUNT(rctm_id) issue_all_qty FROM yuapo.dim_rctm_da WHERE is_check_id = 2 AND user_id > 0 GROUP BY user_id"
+  },
+  {
+    "字段名称": "vip_status",
+    "字段中文": "会员状态",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "判断vipType = 1002和1003的 VIP 类型生效，属于特定类型 VIP 的订阅状态标识",
+    "涉及sql逻辑": "SELECT uid, CASE WHEN (EXTRACT(EPOCH FROM end_time) * 1000)::BIGINT > (EXTRACT(EPOCH FROM NOW()) * 1000 + 2000)::BIGINT THEN 1 ELSE 2 END AS vip_sub_status FROM public.ods_vip_membership WHERE vip_type = 1002 or vip_type = 1003"
+  },
+  {
+    "字段名称": "user_current_city",
+    "字段中文": "用户当前所在城市",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "通过火山埋点登录事件和用户表里的ip来判断用户当前所在城市",
+    "涉及sql逻辑": "SELECT GET_JSON_OBJECT(GET_JSON_OBJECT(volcan_content,'$.user'),'$.user_unique_id') AS user_unique_id, DATE_FORMAT(CAST(FROM_UNIXTIME(CAST(GET_JSON_OBJECT(volcan_content,'$.datetime') AS BIGINT)) AS TIMESTAMP),'yyyyMMdd HH:mm:ss') AS formatted_datetime FROM yuapo.ods_volcan_behavior_event WHERE year = '2024' AND month = '10' AND DAY = '17' AND GET_JSON_OBJECT(GET_JSON_OBJECT(volcan_content,'$.header'),'$.app_id') IN ('10000026','1000001') AND GET_JSON_OBJECT(volcan_content,'$.event_name') = 'app_launch'"
+  },
+  {
+    "字段名称": "jigong_previous_bookkenping_time",
+    "字段中文": "上一次记工时间",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "对于每个用户，找到在记工流水表中最新的记工时间（按时间降序排列的第一条记录的时间）",
+    "涉及sql逻辑": "SELECT created_by, created_time AS jigong_previous_bookkenping_time FROM (SELECT created_by, created_time, ROW_NUMBER() OVER (PARTITION BY created_by ORDER BY created_time DESC) AS rk FROM yuapo.ods_jgjz_bk_business WHERE pt = '20210807') a WHERE a.rk = 1"
+  },
+  {
+    "字段名称": "is_entp_auth",
+    "字段中文": "是否企业认证",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "基于用户结果表里企业状态已通过来看用户是否企业认证",
+    "涉及sql逻辑": "SELECT user_id FROM yuapo.ods_user_result WHERE pt='20210807' AND tenant_key='YPZP' AND deleted=0 AND enterprise_status=2 UNION SELECT sub_account_number FROM yuapo.ods_enterprise_account_relation WHERE pt='20210807' AND deleted=0 AND seat_flag=1"
+  },
+  {
+    "字段名称": "been_viewed_cnt_today",
+    "字段中文": "当日被查看次数",
+    "时效性": "实时",
+    "主题": "招工",
+    "特征描述": "统计岗位当天被查看次数",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "has_first_connect",
+    "字段中文": "是否完成首次联系(包括主动联系 被动联系,使用联系时间计算)",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "根据用户生命周期行为汇总表里看用户是否有首次被联系时间和首次联系时间，如果有则为完成，如果没有则为未完成",
+    "涉及sql逻辑": "SELECT user_id, has_first_connect FROM yuapo.ads_user_lifecycle_characteristics"
+  },
+  {
+    "字段名称": "credibility_label_ids",
+    "字段中文": "用户的信誉标签",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "标签2.0里的信誉标签，通过后台创建标签，根据业务规则或者一线同学判断手动或者自动打上对应标签",
+    "涉及sql逻辑": "SELECT user_id, CONCAT_WS(',',COLLECT_SET(CAST(label_id AS STRING))) label_ids FROM yuapo.dwd_label_user_di WHERE p_date <= '${bizdate}' AND label_type_id = 7 GROUP BY user_id"
+  },
+  {
+    "字段名称": "today_has_login",
+    "字段中文": "当天是否登录",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "判断用户是否登录（火山埋点）",
+    "涉及sql逻辑": "SELECT GET_JSON_OBJECT(GET_JSON_OBJECT(volcan_content,'$.user'),'$.user_unique_id') AS user_unique_id, DATE_FORMAT(CAST(FROM_UNIXTIME(CAST(GET_JSON_OBJECT(volcan_content,'$.datetime') AS BIGINT)) AS TIMESTAMP),'yyyyMMdd HH:mm:ss') AS formatted_datetime FROM yuapo.ods_volcan_behavior_event WHERE year = '2024' AND month = '10' AND DAY = '17' AND GET_JSON_OBJECT(GET_JSON_OBJECT(volcan_content,'$.header'),'$.app_id') IN ('10000026','1000001') AND GET_JSON_OBJECT(volcan_content,'$.event_name') = 'app_launch'"
+  },
+  {
+    "字段名称": "entp_other_label_mark",
+    "字段中文": "企业标记-企业其他标记",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "根据企业上其它标记并查看企业下在职员工，给企业下在职员工打上对应的企业其它标记",
+    "涉及sql逻辑": "SELECT \"source\".\"lab_id\" AS \"lab_id\", \"source\".\"unique_code\" AS \"unique_code\" FROM ( select distinct lab_id, unique_code, lab_cate_id, act_time from ( select unique_code, lab_id, act_type, lab_cate_id, act_time, row_number() over( PARTITION BY unique_code, lab_id ORDER BY act_time DESC ) as row from gateway.label_goss_record lr where lab_cate_id=1 and lab_type_id =4 ) A where row = 1 and act_type <> 2 ) AS \"source\" LIMIT 1048575 并关联企业表拿到在职员工用户ID"
+  },
+  {
+    "字段名称": "user_other_label_mark",
+    "字段中文": "用户标记-用户其他标记",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "统计用户身上所有的其它标记",
+    "涉及sql逻辑": "SELECT \"source\".\"lab_id\" AS \"lab_id\", \"source\".\"unique_code\" AS \"unique_code\" FROM ( select distinct lab_id, unique_code, lab_cate_id, act_time from ( select unique_code, lab_id, act_type, lab_cate_id, act_time, row_number() over( PARTITION BY unique_code, lab_id ORDER BY act_time DESC ) as row from gateway.label_goss_record lr where lab_cate_id=2 and lab_type_id =3 ) A where row = 1 and act_type <> 2 ) AS \"source\" LIMIT 1048575"
+  },
+  {
+    "字段名称": "last_rctm_has_check_gz",
+    "字段中文": "最后一次发布招工信息的工种(审核通过)",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "统计用户最后一次发布岗位信息对应的工种",
+    "涉及sql逻辑": "SELECT user_id, occupations_v2 FROM (SELECT user_id, occupations_v2, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY issue_time DESC NULLS LAST, add_time DESC NULLS LAST, id DESC) as rn FROM public.ods_gczdw) t WHERE rn = 1"
+  },
+  {
+    "字段名称": "role_type_2c",
+    "字段中文": "二分类角色标签（只有老板和工人）",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "基于用户在平台行为模型进行判断用户角色是老板还是工人",
+    "涉及sql逻辑": "SELECT user_id, role_type_2c FROM bigdata.ods_user_role_label"
+  },
+  {
+    "字段名称": "entp_recruit_nature_label",
+    "字段中文": "企业标签-企业招聘性质标签",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "根据企业上招聘性质标签并查看企业下在职员工，给企业下在职员工打上对应的企业招聘性质标签",
+    "涉及sql逻辑": "SELECT * FROM gateway.label_goss_record_uniq WHERE lab_cate_id = 1 AND lab_type_id = 1 并关联企业表拿到在职员工用户ID"
+  },
+  {
+    "字段名称": "label_v3_p_gz_id",
+    "字段中文": "用户标签V3最高分一级工种",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户身上最高分工种对应的一级工种",
+    "涉及sql逻辑": "SELECT user_id, row_rank, p_gz_id FROM yuapo.dws_day_user_label_gz_v3_df WHERE pt = '20251202' AND row_rank = 1"
+  },
+  {
+    "字段名称": "has_pay_order",
+    "字段中文": "是否有现金充值行为",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "判断用户是否有充值行为",
+    "涉及sql逻辑": "order_info 和 jc_pay合并数据"
+  },
+  {
+    "字段名称": "issu_rctm_cnt",
+    "字段中文": "发布招工条数（审核通过）",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "统计用户发的岗位信息数",
+    "涉及sql逻辑": "SELECT user_id, count(id) FROM public.ods_gczdw GROUP BY user_id"
+  },
+  {
+    "字段名称": "sub_resume_gz_ids",
+    "字段中文": "用户自发简历所有工种ID",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "统计用户自发简历上所有的工种ID",
+    "涉及sql逻辑": "SELECT from_user_id, COUNT(*) AS call_15s_cnt FROM reach.ods_privacy_tel_call_log WHERE direction = 2 AND info_id > 0 AND call_duration > 15 AND info_type = 1 GROUP BY from_user_id"
+  },
+  {
+    "字段名称": "been_viewed_cnt_total",
+    "字段中文": "累计被查看次数(从字段上线开始计算)",
+    "时效性": "实时",
+    "主题": "招工",
+    "特征描述": "统计岗位累计被查看次数",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "call_15s_cnt",
+    "字段中文": "中间号通话时长大于15秒次数",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "统计用户参与有效通话（时长超 15 秒）的累计次数",
+    "涉及sql逻辑": "SELECT from_user_id, COUNT(*) AS call_15s_cnt FROM reach.ods_privacy_tel_call_log WHERE direction = 2 AND info_id > 0 AND call_duration > 15 AND info_type = 1 GROUP BY from_user_id"
+  },
+  {
+    "字段名称": "jgjz_day_cnt",
+    "字段中文": "记工总天数",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "通过记工那边的用户信息表和流水表统计每个用户在过去一年内记工的不同天数",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "has_pay",
+    "字段中文": "是否有过充值",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户有过成功支付（非积分支付）的订单则为 1，否则 0",
+    "涉及sql逻辑": "SELECT user_id, CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS has_pay FROM order.ods_order_info_v2 WHERE deleted = 0 AND order_status = 'PAY_SUCCESS' AND pay_type <> 'INTEGRAL_PAY' GROUP BY user_id"
+  },
+  {
+    "字段名称": "last_login_city",
+    "字段中文": "最后一次登录城市",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "从用户最新登录信息表（dws_last_login_df）中，直接获取用户最后一次登录时的城市",
+    "涉及sql逻辑": "select user_id, ts as last_login_time, province as last_login_prov, city as last_login_city, login_provinces_cnt as login_provs_num_total from yuapo.dws_last_login_df where pt = '${bizdate}'"
+  },
+  {
+    "字段名称": "lifecycle_label",
+    "字段中文": "生命周期标签",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "生命周期标签 1-准用户 2-流失用户 3-沉默用户 4-成熟期用户 5-成长期用户 0-无",
+    "涉及sql逻辑": "SELECT user_id, lifecycle_label FROM dws_user_lifecycle_behavior_df WHERE ds='${bdp.system.bizdate}'"
+  },
+  {
+    "字段名称": "is_enterprise_wechat_account",
+    "字段中文": "是否企微客户",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "判断用户是否是企微用户",
+    "涉及sql逻辑": "SELECT user_id FROM yuapo.ods_crm_cp_customer WHERE pt = '20210807' GROUP BY user_id"
+  },
+  {
+    "字段名称": "is_sbscrbd",
+    "字段中文": "订阅状态",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "用户在 ods_reach_member_work_helper 最近一条有效记录里 work_type 字段有值（非空且不为 ''），就认为他已订阅（is_sbscrbd = 1），否则视为未订阅（is_sbscrbd = 0）",
+    "涉及sql逻辑": "SELECT member_id user_id, IF(work_type!='' AND work_type IS NOT NULL,1,0) is_sbscrbd, ROW_NUMBER() OVER(PARTITION BY member_id ORDER BY created_at DESC) AS rk FROM yuapo.ods_reach_member_work_helper WHERE pt='20210807'"
+  },
+  {
+    "字段名称": "rctm_view_num_today",
+    "字段中文": "当天查看招工数量",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户当日查看过的不同岗位数（去重 target_id；含电话/IM/换号查看；剔除退回）",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "reach_receive_success_msg_cnt",
+    "字段中文": "昨日push接收成功次数",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "昨日用户通过 PUSH 成功接收到的消息总数",
+    "涉及sql逻辑": "SELECT rmp.userid user_id, COUNT(rmp.msgid) reach_msg_cnt, SUM(IF(is_receive_success != 0,1,0)) reach_receive_success_msg_cnt FROM ( SELECT msgid, userid FROM yuapo.dwd_reach_message_prod_di WHERE pt = '${bizdate}' AND reachchannel = 'PUSH' AND tenant_name = '触达任务' AND tenantbusiness_name NOT IN ('招工订阅消息推送','公众号每日触达','触达任务公众号每日触达') ) rmp LEFT JOIN ( SELECT msgid, SUM(IF(receivestatus_enum = 'RECEIVE_SUCCESS',1,0)) is_receive_success FROM yuapo.dwd_reach_message_log_prod_di WHERE pt = '${bizdate}' GROUP BY msgid ) rml ON rmp.msgid = rml.msgid GROUP BY rmp.userid"
+  },
+  {
+    "字段名称": "user_tail_2_id",
+    "字段中文": "用户ID后2位尾号",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "用户ID后两位",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "view_rctm_cnt",
+    "字段中文": "查看招工信息次数",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户查看信息次数",
+    "涉及sql逻辑": "SELECT user_id, COUNT(1) view_rctm_cnt FROM yuapo.dwd_rctm_view_da GROUP BY user_id"
+  },
+  {
+    "字段名称": "company_ocr_status",
+    "字段中文": "企业认证状态",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "企业认证是否通过；本账号或其主账号认证通过（enterprise_status=2）则为 1，否则 0",
+    "涉及sql逻辑": "WITH rel AS ( SELECT sub_account_number AS user_id, master_account_number AS master_id FROM user_central.ods_enterprise_account_relation WHERE deleted = 0 ) SELECT u.user_id, CASE WHEN COALESCE(ur.enterprise_status, urm.enterprise_status) = 2 THEN 1 ELSE 0 END AS company_ocr_status FROM ( SELECT DISTINCT user_id FROM user_central.ods_user_result) u LEFT JOIN user_central.ods_user_result ur ON ur.user_id = u.user_id LEFT JOIN rel ON rel.user_id = u.user_id LEFT JOIN user_central.ods_user_result urm ON urm.user_id = rel.master_id"
+  },
+  {
+    "字段名称": "entp_risk_label_mark",
+    "字段中文": "企业标记-企业风险标记",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "企业风控标签打标集合（仅保留 act_type≠2 的有效标签），按企业社会信用代码回传至用户",
+    "涉及sql逻辑": "SELECT e.user_id, STRING_AGG(lab_id::text, ',' ORDER BY lab_id) AS entp_risk_label_mark FROM gateway.label_goss_record_uniq l JOIN user_central.ods_enterprise_base_info e ON e.social_credit_code = l.unique_code AND e.deleted = 0 WHERE l.lab_cate_id = 1 AND l.lab_type_id = 2 AND l.act_type <> 2 GROUP BY e.user_id;"
+  },
+  {
+    "字段名称": "integral",
+    "字段中文": "当前剩余积分",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "用户剩余次数",
+    "涉及sql逻辑": "SELECT id, integral FROM yuapo.ods_member"
+  },
+  {
+    "字段名称": "is_manual_issue_resume",
+    "字段中文": "是否手动发布过简历",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户发布的最新名片是否为“手动发布”（status=1 为手动，0 为自动）",
+    "涉及sql逻辑": "SELECT user_id, MAX(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS is_manual_issue_resume FROM resume.ods_resume_basic GROUP BY user_id"
+  },
+  {
+    "字段名称": "register_source",
+    "字段中文": "鱼泡用户注册端",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户注册来源端",
+    "涉及sql逻辑": "SELECT id AS user_id, source AS register_source FROM public.ods_member;"
+  },
+  {
+    "字段名称": "issue_rctm_cnt_ignore_check",
+    "字段中文": "发布招工信息数(忽略审核状态)",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "累计发布的岗位总数（不看审核状态）",
+    "涉及sql逻辑": "SELECT user_id, COUNT(*) AS issue_rctm_cnt_ignore_check FROM public.ods_gczdw_business_v2 GROUP BY user_id;"
+  },
+  {
+    "字段名称": "job_check_check_count",
+    "字段中文": "查看招工次数",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计每个用户查看职位（expend_type_id = 1 或 13）且未退回的次数",
+    "涉及sql逻辑": "SELECT user_id, COUNT(IF(expend_type_id IN (1,13),integral_consume_id,NULL)) AS job_check_check_count FROM yuapo.dwd_integral_consume_da WHERE is_return_id=0 GROUP BY user_id"
+  },
+  {
+    "字段名称": "reach_msg_cnt",
+    "字段中文": "昨日push触达总次数",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "昨日通过 PUSH 渠道向该用户下发消息的总次数（不去重）",
+    "涉及sql逻辑": "SELECT rmp.userid user_id, COUNT(rmp.msgid) reach_msg_cnt FROM (SELECT msgid, userid FROM yuapo.dwd_reach_message_prod_di WHERE pt = '${bizdate}' AND reachchannel = 'PUSH' AND tenant_name = '触达任务' AND tenantbusiness_name NOT IN ('招工订阅消息推送', '公众号每日触达', '触达任务公众号每日触达')) rmp LEFT JOIN (SELECT msgid, SUM( IF (receivestatus_enum = 'RECEIVE_SUCCESS', 1, 0)) is_receive_success FROM yuapo.dwd_reach_message_log_prod_di WHERE pt = '${bizdate}' GROUP BY msgid) rml ON rmp.msgid = rml.msgid GROUP BY rmp.userid"
+  },
+  {
+    "字段名称": "user_risk_label_mark",
+    "字段中文": "用户标记-用户风险标记",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户风控标签打标集合（仅保留 act_type≠2 的有效标签）",
+    "涉及sql逻辑": "SELECT CAST(unique_code AS bigint) AS user_id, STRING_AGG(lab_id::text, ',' ORDER BY lab_id) AS user_risk_label_mark FROM gateway.label_goss_record_uniq WHERE lab_cate_id = 2 AND lab_type_id = 2 AND act_type <> 2 AND unique_code ~ '^[0-9]+$' GROUP BY unique_code;"
+  },
+  {
+    "字段名称": "c_vip_gc_sub_status",
+    "字段中文": "C端联系次卡状态",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "C 端次卡权益状态；有在有效期内的工长类 VIP（vip_type=1008）则为 1，过期为 2，无则 0",
+    "涉及sql逻辑": "WITH m AS ( SELECT uid AS user_id, MAX(end_time) AS max_end_time FROM member.ods_vip_package_membership WHERE vip_type = 1008 GROUP BY uid ) SELECT user_id, CASE WHEN max_end_time IS NULL THEN 0 WHEN max_end_time > to_timestamp(EXTRACT(EPOCH FROM NOW()) * 1000 / 1000) THEN 1 ELSE 2 END AS c_vip_gc_sub_status FROM m;"
+  },
+  {
+    "字段名称": "is_jigong_user",
+    "字段中文": "是否记工记账用户",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "如果用户在 yuapo.ods_jgjz_bk_member_t 表中有对应记录，则为记工记账用户（1），否则为非记工记账用户（0）",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "last_issu_rctm_ts",
+    "字段中文": "最后一次发布招工时间",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户最近一次发布岗位时间（秒级时间戳）",
+    "涉及sql逻辑": "SELECT user_id, MAX(add_time) AS last_issu_rctm_ts FROM public.ods_gczdw_business_v2 GROUP BY user_id;"
+  },
+  {
+    "字段名称": "last_issue_add_time",
+    "字段中文": "最后一次发布招工时间",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户最后一次发布招工时间",
+    "涉及sql逻辑": "SELECT user_id, id AS last_issue_issue_id, add_time AS last_issue_add_time, area_name AS last_issue_city FROM (SELECT city_id, province_id, location, user_id, id, add_time, ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY add_time DESC) AS rk FROM ods_gczdw_q WHERE pt = '20210807' AND is_check = 2 AND user_id != 0) a2 WHERE a2.rk = 1"
+  },
+  {
+    "字段名称": "last_view_rctm_time",
+    "字段中文": "最后一次查看招工时间",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户最后一次查看招工时间",
+    "涉及sql逻辑": "SELECT user_id, MAX(ts) last_view_rctm_time FROM yuapo.dwd_rctm_view_da GROUP BY user_id"
+  },
+  {
+    "字段名称": "volcano_user_behavior_exposure_cnt_today",
+    "字段中文": "当日曝光次数",
+    "时效性": "实时",
+    "主题": "招工",
+    "特征描述": "用户当日曝光次数",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "jgjz_last_source",
+    "字段中文": "最后记工来源端",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "计算用户最后一次记工来源端",
+    "涉及sql逻辑": "SELECT user_id, max(jgjz_last_source) AS jgjz_last_source FROM (SELECT yp_user_id user_id, IF (last_source != '' AND last_source IS NOT NULL,last_source,NVL(source,'')) jgjz_last_source FROM yuapo.dim_jgjz_user_da WHERE yp_user_id > 0) t GROUP BY user_id"
+  },
+  {
+    "字段名称": "sort_time",
+    "字段中文": "信息排序时间",
+    "时效性": "实时",
+    "主题": "招工",
+    "特征描述": "岗位排序时间",
+    "涉及sql逻辑": "SELECT id AS rctm_id, sort_time FROM public.ods_gczdw_business_v2"
+  },
+  {
+    "字段名称": "top_in_life_cycle",
+    "字段中文": "信息是否置顶中",
+    "时效性": "实时",
+    "主题": "招工",
+    "特征描述": "统计岗位位生命周期内是否处于置顶（pin）中：存在 status=1 且 plan_end_time>now 且 actual_end_time 为空的记录",
+    "涉及sql逻辑": "SELECT pir.info_id AS rctm_id, CASE WHEN MAX(CASE WHEN pir.status = 1 AND pir.plan_end_time > NOW() AND pir.actual_end_time IS NULL THEN 1 ELSE 0 END) = 1 THEN 1 ELSE 0 END AS top_in_life_cycle FROM member.pin_info_right pir GROUP BY pir.info_id"
+  },
+  {
+    "字段名称": "user_integral",
+    "字段中文": "当前剩余积分",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户当前剩余积分",
+    "涉及sql逻辑": "SELECT id AS user_id, integral AS user_integral FROM public.ods_member"
+  },
+  {
+    "字段名称": "b_vip_status",
+    "字段中文": "B端会员当前招聘会员生效状态",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "B 端会员状态（vip_type=1006）：有效期内为 1，过期为 2，无则 0",
+    "涉及sql逻辑": "WITH m AS ( SELECT uid AS user_id, MAX(end_time) AS max_end_time FROM member.ods_vip_package_membership WHERE vip_type = 1006 GROUP BY uid ) SELECT user_id, CASE WHEN max_end_time IS NULL THEN 0 WHEN EXTRACT(EPOCH FROM max_end_time) * 1000 > EXTRACT(EPOCH FROM NOW()) * 1000 THEN 1 ELSE 2 END AS b_vip_status FROM m;"
+  },
+  {
+    "字段名称": "buy_c_vip_session_card_cnt",
+    "字段中文": "购买c端会员季卡次数",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户累计购买 C 端（vip_type=1002）90 天次卡的次数",
+    "涉及sql逻辑": "SELECT uid AS user_id, COUNT(*) AS buy_c_vip_session_card_cnt FROM public.ods_vip_record WHERE vip_type = 1002 AND type <> 1 AND days = 90 GROUP BY uid;"
+  },
+  {
+    "字段名称": "check_resume_all_qty",
+    "字段中文": "查看找活次数",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户查看简历次数",
+    "涉及sql逻辑": "SELECT user_id, COUNT(1) AS check_resume_all_qty FROM yuapo.dwd_resume_view_da WHERE user_id > 0 GROUP BY user_id"
+  },
+  {
+    "字段名称": "cur_android_app_version",
+    "字段中文": "安卓当前使用APP版本",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户 Android 端最新一次 App 启动上报的版本号",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "issue_source",
+    "字段中文": "发布来源 ",
+    "时效性": "实时",
+    "主题": "招工",
+    "特征描述": "岗位发布来源（岗位级）：user_id>0 记 1（用户发布），否则 2",
+    "涉及sql逻辑": "SELECT id AS rctm_id, CASE WHEN user_id > 0 THEN 1 ELSE 2 END AS issue_source FROM public.ods_gczdw_business_v2"
+  },
+  {
+    "字段名称": "max_label_socre_gz_industry_names",
+    "字段中文": "用户最高分工种所属行业",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "用户工种2.0最高分工种所属行业",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "rctm_view_cnt",
+    "字段中文": "查看招工次数",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户累计查看岗位的次数（不去重；含电话/IM/换号查看；剔除退回）",
+    "涉及sql逻辑": "SELECT user_id, COUNT(*) AS rctm_view_cnt FROM public.ods_expense_calendar GROUP BY user_id;"
+  },
+  {
+    "字段名称": "yupao_user_role",
+    "字段中文": "用户角色",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "判断用户角色",
+    "涉及sql逻辑": "SELECT uid, role FROM yuapo.ods_member_yupao WHERE pt='20210807'"
+  },
+  {
+    "字段名称": "has_first_call",
+    "字段中文": "是否完成首次沟通",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "判断用户是否完成首次沟通",
+    "涉及sql逻辑": "SELECT user_id, IF(last_act_rctm_view_cnt>0 AND last_act_call_cnt=0,1,0) last_act_has_rctm_exposure_no_call FROM dws_user_lifecycle_behavior_df WHERE ds='${bdp.system.bizdate}'"
+  },
+  {
+    "字段名称": "integral_consume_total",
+    "字段中文": "累计消耗正式积分总数（含退回）",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "统计用户历史累计消耗的正式积分（包含退回的积分)",
+    "涉及sql逻辑": "SELECT user_id, SUM(expense_integral)::bigint AS integral_consume_total FROM public.ods_expense_calendar WHERE COALESCE(is_return, 0) = 0 GROUP BY user_id;"
+  },
+  {
+    "字段名称": "last_app_launch_ts",
+    "字段中文": "最近一次打开APP时间",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户最近一次 App 启动时间（秒）",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "last_login_split_privince",
+    "字段中文": "最后一次登录省份",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户最后一次登录的省份",
+    "涉及sql逻辑": "SELECT b.user_id, a.last_issue_jobgz0_agg, a.last_issue_jobgz1_agg, a.last_issue_jobgz2_agg, b.last_login_split_city, b.last_login_split_privince FROM (SELECT a.user_id, (CASE WHEN (a.city LIKE '黑龙江%' OR a.city LIKE '内蒙古%') THEN SUBSTR(a.city, 1, 3) ELSE SUBSTR(a.city, 1, 2) END) AS last_login_split_privince, (CASE WHEN (a.city LIKE '黑龙江%' OR a.city LIKE '内蒙古%') THEN SUBSTR(a.city, 4) ELSE SUBSTR(a.city, 3) END) AS last_login_split_city FROM (SELECT user_id, city, add_time, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY add_time DESC) AS ranks FROM yuapo.ods_member_login_log_formal WHERE pt >= '202004' AND user_id > 0) AS a WHERE a.ranks = 1) AS b LEFT JOIN (SELECT user_id, NVL (ARRAY_JOIN (issue_jobgz0, ','), '0') AS last_issue_jobgz0_agg, NVL (ARRAY_JOIN (issue_jobgz1, ','), '0') AS last_issue_jobgz1_agg, NVL (ARRAY_JOIN (issue_jobgz2, ','), '0') AS last_issue_jobgz2_agg FROM (SELECT user_id, COLLECT_SET (gz_ctlg) issue_jobgz0, COLLECT_SET (prim_gz_name) issue_jobgz1, COLLECT_SET (sub_gz_name) issue_jobgz2 FROM (SELECT user_id, gz_ctlg, prim_gz_name, sub_gz_name, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY issu_ts DESC) AS rn FROM yuapo.dim_rctm_gz_da WHERE gz_version = 2 AND user_id > 0 AND check_status = '已审核') WHERE rn = 1 GROUP BY user_id)) AS a ON b.user_id = a.user_id"
+  },
+  {
+    "字段名称": "has_app_login",
+    "字段中文": "是否app登录过",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户是否有过 App 启动",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "is_ka_sales_customer_clue",
+    "字段中文": "是否销售大客圈定线索",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "判断用户在 SCRM 客户表中满足 KA 海条件时置 1，否则置 0",
+    "涉及sql逻辑": "SELECT user_id, CASE WHEN MAX(CASE WHEN sea_id = 1003 AND follow_status = 1 AND COALESCE(deleted, 0) = 0 THEN 1 ELSE 0 END) = 1 THEN 1 ELSE 0 END AS is_ka_sales_customer_clue FROM scrm.ods_customer_info GROUP BY user_id;"
+  },
+  {
+    "字段名称": "is_user_first_issue",
+    "字段中文": "是否首发信息",
+    "时效性": "实时",
+    "主题": "招工",
+    "特征描述": "岗位是否为该用户“首发”岗位",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "issue_recruit_rctm_cnt_total",
+    "字段中文": "历史发布招聘类信息数",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "历史发布“招聘类”岗位数量（忽略审核）",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "last_act_has_rctm_exposure_no_call",
+    "字段中文": "末次登录有岗位浏览无沟通",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "判断用户末次登录有岗位浏览无沟通",
+    "涉及sql逻辑": "SELECT user_id, IF(last_act_rctm_view_cnt>0 AND last_act_call_cnt=0,1,0) last_act_has_rctm_exposure_no_call FROM dws_user_lifecycle_behavior_df WHERE ds='${bdp.system.bizdate}'"
+  },
+  {
+    "字段名称": "last_rctm_status",
+    "字段中文": "最后一次招工 招工状态",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "计算用户最后一次发布岗位信息的审核招聘状态（-1:用户从未发布过招工（默认兜底值）,0:最后一次招工未通过审核,1:最后一次招工正在审核中,2:最后一次招工审核通过且正在招聘中,3:最后一次招工审核通过但已招满）",
+    "涉及sql逻辑": "SELECT t1.user_id, t1.is_recruit, t1.last_rctm_gz_mode, CASE WHEN t2.is_check_id = 0 THEN 0 WHEN t2.is_check_id = 1 THEN 1 WHEN t2.is_check_id = 2 AND is_end_id = 1 THEN 2 WHEN t2.is_check_id = 2 AND is_end_id = 2 THEN 3 ELSE -1 END last_rctm_status, IF (t2.city_id = 0, t2.province_id, t2.city_id) area_id, recruit_gz_id_index, order_gz_id_index, gz_ids, gz_names, t3.area_name last_rctm_area_name FROM (SELECT user_id, MAX_BY (is_recruit, issu_ts) is_recruit, MAX_BY (last_rctm_gz_mode, issu_ts) last_rctm_gz_mode, MAX_BY (rctm_id, issu_ts) rctm_id, MAX_BY (recruit_gz_id_index, issu_ts) recruit_gz_id_index, MAX_BY (order_gz_id_index, issu_ts) order_gz_id_index, MAX_BY (gz_ids, issu_ts) gz_ids, MAX_BY (gz_names, issu_ts) gz_names FROM (SELECT t1.user_id, t1.rctm_id, IF (SUM( IF (mode_id = 2, 1, 0)) != 0, 1, 0) is_recruit, WM_CONCAT (',', CAST(mode_id AS STRING)) last_rctm_gz_mode, MAX(t1.issu_ts) issu_ts, WM_CONCAT (',', IF (mode_id = 2, gz_id, NULL)) recruit_gz_id_index, WM_CONCAT (',', IF (mode_id = 1, gz_id, NULL)) order_gz_id_index, WM_CONCAT (',', gz_id) gz_ids, WM_CONCAT (',', gz_name) gz_names FROM yuapo.dim_rctm_gz_da t1 JOIN yuapo.dim_rctm_da t2 ON t1.rctm_id = t2.rctm_id AND t2.is_check_id = 2 WHERE gz_version = 2 GROUP BY t1.user_id, t1.rctm_id) t1 GROUP BY user_id) t1 JOIN yuapo.dim_rctm_da t2 ON t1.user_id = t2.user_id AND t1.rctm_id = t2.rctm_id LEFT JOIN yuapo.dim_pub_area_da t3 ON IF (t2.city_id = 0, t2.province_id, t2.city_id) = t3.area_id"
+  },
+  {
+    "字段名称": "rcting_cnt",
+    "字段中文": "招工信息正在招的数量",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户发布正在招岗位的次数",
+    "涉及sql逻辑": "SELECT user_id, SUM( IF (is_end_id = 1, 1, 0)) rcting_cnt FROM yuapo.dwd_zhaogong_basic_df WHERE user_id != 0 AND is_check_id = 2 GROUP BY user_id"
+  },
+  {
+    "字段名称": "rctm_view_num",
+    "字段中文": "查看招工数量",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "累计查看过的岗位数量（去重 target_id；剔除退回）",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "refresh_resume_last_refresh_time",
+    "字段中文": "最后一次刷新名片时间",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "计算用户最后一次刷新名片时间",
+    "涉及sql逻辑": "SELECT user_id, MAX( IF (expend_type_id = 8, ts, 0)) AS refresh_resume_last_refresh_time FROM yuapo.dwd_integral_consume_da WHERE is_return_id = 0 GROUP BY user_id"
+  },
+  {
+    "字段名称": "register_city",
+    "字段中文": "用户注册地区",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "注册 IP 解析的城市",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "sum_expense_formal_integral",
+    "字段中文": "累计消耗正式积分",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "从积分消耗表中统计用户累计消耗正式积分",
+    "涉及sql逻辑": "SELECT user_id, sum(integral - temp_integral) AS sum_expense_formal_integral FROM yuapo.ods_integral_expend_record_q WHERE pt = '20210807' AND is_return = 0 GROUP BY user_id"
+  },
+  {
+    "字段名称": "ticket_been_chicked",
+    "字段中文": "招工被查看次数",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户在招工表发布的岗位被查看次数",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "assc_account_num",
+    "字段中文": "发布关联账号数量",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "通户“同一聚合口径（type=1：账号关联）”的账号数量",
+    "涉及sql逻辑": "SELECT user_id, GREATEST (MAX( CASE WHEN type = 1 AND deleted = 0 THEN count END) - 1, 0) AS assc_account_num FROM risk.ods_related_account_stat GROUP BY user_id;"
+  },
+  {
+    "字段名称": "buy_c_vip_month_card_cnt",
+    "字段中文": "购买c端会员月卡次数",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "统计C 端 30 天卡购买次数（vip_type=1002 且 type!=1）",
+    "涉及sql逻辑": "SELECT uid AS user_id, COUNT(*) AS buy_c_vip_month_card_cnt FROM public.ods_vip_record WHERE vip_type = 1002 AND type <> 1 AND days = 30 GROUP BY uid;"
+  },
+  {
+    "字段名称": "enterprise_audit_status_v2",
+    "字段中文": "用户企业认证状态",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "企业认证状态",
+    "涉及sql逻辑": "SELECT user_id, enterprise_status AS enterprise_audit_status_v2 FROM user_central.ods_user_result;"
+  },
+  {
+    "字段名称": "enterprise_audit_type",
+    "字段中文": "用户企业认证类型",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "企业认证类型",
+    "涉及sql逻辑": "SELECT user_id, type AS enterprise_audit_type FROM user_central.ods_enterprise_base_info WHERE deleted = 0;"
+  },
+  {
+    "字段名称": "enterprise_type",
+    "字段中文": "企业认证类型",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "企业类型枚举",
+    "涉及sql逻辑": "SELECT user_id, enterprise_type FROM user_central.ods_enterprise_base_info WHERE deleted = 0;"
+  },
+  {
+    "字段名称": "in_sales_customer",
+    "字段中文": "是否大客销售绑定用户",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "判断该用户是否被“大客销售”绑定过",
+    "涉及sql逻辑": "SELECT user_id, 1 in_sales_customer FROM yuapo.ods_scrm_sales_customer WHERE pt = '20210807' AND user_id > 0 GROUP BY user_id;"
+  },
+  {
+    "字段名称": "issue_engineering_qty",
+    "字段中文": "发布工程类招工条数",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户发布的“工程类”招工信息的总条数",
+    "涉及sql逻辑": "SELECT user_id, COUNT( IF (special_type_id IN ('0', '1', ''), rctm_id, NULL)) issue_engineering_qty FROM yuapo.dim_rctm_da WHERE is_check_id = 2 AND user_id > 0 GROUP BY user_id;"
+  },
+  {
+    "字段名称": "last_urgent_status",
+    "字段中文": "加急招生效状态",
+    "时效性": "实时",
+    "主题": "招工",
+    "特征描述": "岗位最近一次“加急”状态（0/1），取加急记录最新一条",
+    "涉及sql逻辑": "SELECT info_id AS rctm_id, COALESCE((ARRAY_AGG(status ORDER BY updated_at DESC))[1], 0) AS last_urgent_status FROM member.ods_urgent_info_right GROUP BY info_id;"
+  },
+  {
+    "字段名称": "new_enterprise_supplement_tag",
+    "字段中文": "企业是否需要补充资料",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "企业补充认证标记",
+    "涉及sql逻辑": "SELECT user_id, supplement_tag AS new_enterprise_supplement_tag FROM user_central.ods_enterprise_base_info WHERE deleted = 0;"
+  },
+  {
+    "字段名称": "pay_order_cnt_td",
+    "字段中文": "用户历史充值次数",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户历史充值次数,做全量累加,每次跑批时把历史订单做一次重算（或增量合并），保证只要订单状态=“支付成功”就算一次",
+    "涉及sql逻辑": "SELECT user_id, IF(pay_order_cnt_td>1,1,0) has_first_pay_order FROM dws_user_lifecycle_behavior_df WHERE ds='${bdp.system.bizdate}'"
+  },
+  {
+    "字段名称": "resume_check_status",
+    "字段中文": "名片审核状态",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "简历审核状态",
+    "涉及sql逻辑": "SELECT user_id, CASE WHEN check_status = 3 THEN 0 ELSE check_status END AS resume_check_status FROM (SELECT user_id, check_status, updated_at, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY updated_at DESC) AS rn FROM resume.ods_resume_basic WHERE deleted = 0) AS t WHERE rn = 1;"
+  },
+  {
+    "字段名称": "role_type_3c",
+    "字段中文": "三分类角色标签（有老板和工人和两者都是）",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户三类角色",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "top_resume_last_top_end_time",
+    "字段中文": "最后一次置顶名片结束时间",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "计算用户最后一次成功置顶简历的结束时间",
+    "涉及sql逻辑": "SELECT a.user_uuid AS user_uuid, b.end_time AS top_resume_last_top_end_time FROM (SELECT user_uuid, SUM(end_time - start_time) / 60 / 60 AS top_total_hours FROM yuapo.ods_top_resume WHERE pt = '20210807' GROUP BY user_uuid) AS a LEFT JOIN (SELECT user_uuid, start_time, end_time, (end_time - start_time) / 60 / 60 AS top_hours FROM (SELECT user_uuid, start_time, end_time, ROW_NUMBER() OVER (PARTITION BY user_uuid ORDER BY start_time DESC) AS rk FROM yuapo.ods_top_resume WHERE pt = '20210807') WHERE rk = 1) AS b ON a.user_uuid = b.user_uuid"
+  },
+  {
+    "字段名称": "boss_gz_label_scorce_30d",
+    "字段中文": "近30天老板身份工种标签分数",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "近30天老板身份工种标签分数",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "company_type",
+    "字段中文": "企业类型",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "公司类型",
+    "涉及sql逻辑": "SELECT user_id, type AS company_type FROM user_central.ods_enterprise_base_info WHERE deleted = 0;"
+  },
+  {
+    "字段名称": "enterprise_status",
+    "字段中文": "企业认证状态编码",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "企业认证状态",
+    "涉及sql逻辑": "SELECT user_id, enterprise_status FROM user_central.ods_user_result WHERE tenant_key = 'YPZP';"
+  },
+  {
+    "字段名称": "is_attn_gczr",
+    "字段中文": "是否关注【工厂招人】公众号",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "是否关注【工厂招人】公众号",
+    "涉及sql逻辑": "SELECT uid, IF (SUM( IF (app_id = 'wxab8dd664763a22a4', 1, 0)) != 0, 1, 0) is_attn_gczr FROM yuapo.ods_follow_record WHERE pt = '20210807' AND STATUS = 1 GROUP BY uid;"
+  },
+  {
+    "字段名称": "is_new_businesslicense",
+    "字段中文": "是否是新营业执照",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "是否“新工商执照”注册（认证时间距成立时间≤14天记 1，否则 0）",
+    "涉及sql逻辑": "WITH t AS ( SELECT user_id, MAX(authentication_time) AS auth_ts, MAX(incorporation_date_time) AS inc_ts FROM user_central.ods_authentication_enterprise_log GROUP BY user_id ) SELECT user_id, CASE WHEN auth_ts::date - inc_ts::date <= 14 AND auth_ts >= inc_ts THEN 1 ELSE 0 END AS is_new_businesslicense FROM t;"
+  },
+  {
+    "字段名称": "issue_delivery_rider_cnt180d",
+    "字段中文": "近半年发布外卖骑手职位数量",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "近 180 天发布“外卖骑手”岗位次数",
+    "涉及sql逻辑": "SELECT user_id, COUNT(*) AS issue_delivery_rider_cnt180d FROM public.ods_gczdw_business_v2 WHERE TO_TIMESTAMP(add_time) >= now() - INTERVAL '180 days' AND (',' || occupations_v2 || ',') LIKE '%,594,%' GROUP BY user_id;"
+  },
+  {
+    "字段名称": "issue_jobgz0_agg",
+    "字段中文": "发布招工0级工种",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计发布招工0级工种",
+    "涉及sql逻辑": "SELECT id, NVL (ARRAY_JOIN (issue_jobgz0, ','), '') issue_jobgz0_agg FROM (SELECT id FROM yuapo.ods_member WHERE pt = '20210807'"
+  },
+  {
+    "字段名称": "jgjz_user_role_type",
+    "字段中文": "记工用户角色",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "记工用户角色",
+    "涉及sql逻辑": "SELECT yp_user_id user_id ,MAX_BY(CASE role_type WHEN '班组长' THEN 1 WHEN '工人' THEN 2 ELSE 0 END,register_ts) jgjz_user_role_type FROM yuapo.dim_jgjz_user_da WHERE yp_user_id>0 GROUP BY yp_user_id;"
+  },
+  {
+    "字段名称": "rctm_view_num_7day",
+    "字段中文": "近7日内查看招工数量",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "近 7 天查看的不同岗位数（去重；剔除退回）",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "register_source_id",
+    "字段中文": "注册来源端id",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "用户注册来源端",
+    "涉及sql逻辑": "SELECT u.user_id, NVL (u.source_id, '') register_source_id FROM yuapo.dim_user_da u;"
+  },
+  {
+    "字段名称": "resume_view_num",
+    "字段中文": "找活被查看次数",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户简历被查看次数",
+    "涉及sql逻辑": "SELECT issue_user_id user_id, COUNT(1) resume_view_num FROM yuapo.dwd_resume_view_da WHERE issue_user_id>0 GROUP BY issue_user_id;"
+  },
+  {
+    "字段名称": "talk_to_worker_cnt_today",
+    "字段中文": "当天聊一聊牛人次数",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "当日联系牛人次数",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "tel_real_status",
+    "字段中文": "手机号是否报备",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "手机号实名状态",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "assc_device_num",
+    "字段中文": "设备关联账号数量",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "与该用户处于“同设备”的账号数量",
+    "涉及sql逻辑": "WITH ud AS ( SELECT user_id, device_id FROM risk.ods_related_account_device_id_user WHERE deleted = 0 ), du AS ( SELECT device_id, COUNT(DISTINCT user_id) AS c FROM ud GROUP BY device_id ) SELECT u.user_id, GREATEST (MAX(du.c) - 1, 0) AS assc_device_num FROM ud u JOIN du ON u.device_id = du.device_id GROUP BY u.user_id;"
+  },
+  {
+    "字段名称": "boss_gz_label_scorce_total",
+    "字段中文": "历史老板身份工种标签分数",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "用户历史上所有“老板”身份下的工种标签得分总和",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "c_vip_30_end_ts",
+    "字段中文": "最近一次求职月会员过期时间",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户最新且未被退订的30 天 VIP 套餐，把对应的结束时间转成时间戳输出，没有则为 0",
+    "涉及sql逻辑": "SELECT user_id, MAX( IF (vip_days = 30, UNIX_TIMESTAMP (after_end_time), 0)) AS c_vip_30_end_ts FROM (SELECT user_id, vip_days, after_end_time, type_id, ROW_NUMBER() OVER (PARTITION BY user_id, vip_days ORDER BY after_end_time DESC) AS rn FROM yuapo.dwd_vip_package_record_da t1 LEFT ANTI JOIN (SELECT pre_biz_id FROM yuapo.dwd_vip_package_record_da WHERE type_id = 1 AND pre_biz_id IS NOT NULL AND created_at < FROM_UNIXTIME (UNIX_TIMESTAMP (TO_DATE('${bizdate+1}', 'yyyyMMdd')))) t2 ON t1.biz_id = t2.pre_biz_id WHERE t1.type_id != 1 AND t1.created_at < FROM_UNIXTIME (UNIX_TIMESTAMP (TO_DATE('${bizdate+1}', 'yyyyMMdd'))) AND t1.vip_type = 1002 AND t1.vip_days IN (7, 30, 90)) WHERE rn = 1 GROUP BY user_id;"
+  },
+  {
+    "字段名称": "c_vip_90_end_ts",
+    "字段中文": "最近一次求职季会员过期时间",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户最新且未被退订的90 天 VIP 套餐，把对应的结束时间转成时间戳输出，没有则为 0",
+    "涉及sql逻辑": "SELECT user_id, MAX( IF (vip_days = 90, UNIX_TIMESTAMP (after_end_time), 0)) AS c_vip_90_end_ts FROM (SELECT user_id, vip_days, after_end_time, type_id, ROW_NUMBER() OVER (PARTITION BY user_id, vip_days ORDER BY after_end_time DESC) AS rn FROM yuapo.dwd_vip_package_record_da t1 LEFT ANTI JOIN (SELECT pre_biz_id FROM yuapo.dwd_vip_package_record_da WHERE type_id = 1 AND pre_biz_id IS NOT NULL AND created_at < FROM_UNIXTIME (UNIX_TIMESTAMP (TO_DATE('${bizdate+1}', 'yyyyMMdd')))) t2 ON t1.biz_id = t2.pre_biz_id WHERE t1.type_id != 1 AND t1.created_at < FROM_UNIXTIME (UNIX_TIMESTAMP (TO_DATE('${bizdate+1}', 'yyyyMMdd'))) AND t1.vip_type = 1002 AND t1.vip_days IN (7, 30, 90)) WHERE rn = 1 GROUP BY user_id;"
+  },
+  {
+    "字段名称": "cur_app_version",
+    "字段中文": "用户当前使用APP版本",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "用户最近一次 App 启动上报的版本号",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "is_attn_yphy",
+    "字段中文": "是否关注【鱼泡货运】公众号",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "判断用户是否关注【鱼泡货运】公众号",
+    "涉及sql逻辑": "SELECT uid, IF(SUM(IF(app_id = 'wx0ba30bb767f92a4b',1,0)) != 0,1,0) is_attn_yphy FROM yuapo.ods_follow_record WHERE pt = '20210807' AND STATUS = 1 GROUP BY uid;"
+  },
+  {
+    "字段名称": "is_attn_zpsjzzg",
+    "字段中文": "是否关注【装配式建筑招工】公众号",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "判断用户是否关注【装配式建筑招工】公众号",
+    "涉及sql逻辑": "SELECT uid user_id, MAX( IF (app_id = 'wxeab419e6410936e2', 1, 0)) is_attn_gdzg, MAX( IF (app_id = 'wxab8dd664763a22a4', 1, 0)) is_attn_gdzr, MAX( IF (app_id = 'wxd88457ba4c26f49e', 1, 0)) is_attn_gczb, MAX( IF (app_id = 'wx97877fe3b35187a7', 1, 0)) is_attn_gczjx, MAX( IF (app_id = 'wxa5ae39c0d19e5610', 1, 0)) is_attn_ypjst, MAX( IF (app_id = 'wx28458d287cb4b624', 1, 0)) is_attn_jzzgkt, MAX( IF (app_id = 'wxda2bc049b93f8fde', 1, 0)) is_attn_zpsjzzg FROM yuapo.ods_follow_record WHERE pt = '20210807' AND `status` = 1 GROUP BY uid;"
+  },
+  {
+    "字段名称": "last_app_launch_brand",
+    "字段中文": "最近一次登录的手机的品牌",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "最近一次 App 启动平台",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "last_check_resume_gongzhong",
+    "字段中文": "最近一次查看找活名片的工种",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "用户最近一次查看的简历所对应的所有工种名称（去重后）用逗号连接的字符串",
+    "涉及sql逻辑": "SELECT a.user_id user_id, a.time last_check_resume_time, b.gz_names AS last_check_resume_gongzhong, a.total_check_resume_cnt total_check_resume_cnt FROM (SELECT user_id, target_id AS resume_id, time, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY time DESC) AS rk, COUNT(DISTINCT target_id) OVER (PARTITION BY user_id) AS total_check_resume_cnt FROM yuapo.ods_integral_expend_record_q WHERE pt = '20210807' AND expend_type IN (2, 14)) AS a LEFT JOIN (SELECT resume_id, ARRAY_JOIN (COLLECT_SET ( IF (sub_gz_name != '', sub_gz_name, prim_gz_name)), ',') gz_names FROM yuapo.dim_resume_gz_da WHERE gz_version = 2 GROUP BY resume_id) AS b ON a.resume_id = b.resume_id WHERE a.rk = 1;"
+  },
+  {
+    "字段名称": "rctm_prov_view_num_7day",
+    "字段中文": "近7日内查看招工信息的省份数",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "近 7 天查看过岗位涉及的省份数",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "resume_view_num",
+    "字段中文": "查看找活数量",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "累计查看简历（联系牛人）次数（去重简历 id/uuid；剔除退回）",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "user_role",
+    "字段中文": "用户角色",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "当前角色 now_role",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "user_role_id",
+    "字段中文": "用户选择身份",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "用户选择的身份",
+    "涉及sql逻辑": "SELECT t1.user_id, user_role_id FROM yuapo.dim_user_da t1;"
+  },
+  {
+    "字段名称": "view_rctm_province",
+    "字段中文": "用户查看岗位地址-省(从字段上线时间开始计算)",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "历史查看岗位涉及省份集合（去重后逗号拼接）",
+    "涉及sql逻辑": ""
+  },
+  {
+    "字段名称": "attn_office",
+    "字段中文": "关注公众号集合",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户关注的哪些公众号",
+    "涉及sql逻辑": "SELECT uid, CONCAT_WS(',',COLLECT_SET(app_id)) attn_office FROM yuapo.ods_follow_record WHERE pt = '20210807' AND STATUS = 1 GROUP BY uid;"
+  },
+  {
+    "字段名称": "buy_vip_cnt",
+    "字段中文": "购买会员次数",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户购买vip_type = 1002 且 type ≠ 1 或 2 的 VIP 记录总数",
+    "涉及sql逻辑": "SELECT uid user_id, COUNT(IF(type NOT IN (1,2),1,NULL)) - COUNT(IF(type = 1,1,NULL)) buy_vip_cnt FROM yuapo.ods_vip_record WHERE pt = '20210807' AND vip_type = 1002 AND type NOT IN (1,2) GROUP BY uid;"
+  },
+  {
+    "字段名称": "c_vip_7_end_ts",
+    "字段中文": "最近一次求职周会员过期时间",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "取 C 端用户「7 天求职 VIP」最近一次已购且未被退款的套餐的 过期时间（after_end_time）的 UNIX 时间戳；若不存在，则填 0",
+    "涉及sql逻辑": "SELECT user_id, MAX(IF(vip_days = 7,UNIX_TIMESTAMP(after_end_time),0)) AS c_vip_7_end_ts FROM (SELECT user_id, vip_days, after_end_time, type_id, ROW_NUMBER() OVER (PARTITION BY user_id,vip_days ORDER BY after_end_time DESC ) AS rn FROM yuapo.dwd_vip_package_record_da t1 LEFT ANTI JOIN (SELECT pre_biz_id FROM yuapo.dwd_vip_package_record_da WHERE type_id = 1 AND pre_biz_id IS NOT NULL AND created_at < FROM_UNIXTIME (UNIX_TIMESTAMP (TO_DATE('${bizdate+1}', 'yyyyMMdd')))) t2 ON t1.biz_id = t2.pre_biz_id WHERE t1.type_id != 1 AND t1.created_at < FROM_UNIXTIME (UNIX_TIMESTAMP (TO_DATE('${bizdate+1}', 'yyyyMMdd'))) AND t1.vip_type = 1002 AND t1.vip_days IN (7)) WHERE rn = 1 GROUP BY user_id;"
+  },
+  {
+    "字段名称": "has_exchange_req",
+    "字段中文": "是否发起过IM交换请求",
+    "时效性": "离线",
+    "主题": "用户",
+    "特征描述": "统计用户是否交换过IM请求",
+    "涉及sql逻辑": "SELECT user_id FROM yuapo.ods_im_chat_exchange_tel_log WHERE pt = '20210807' AND deleted = 0 GROUP BY user_id;"
+  },
+  {
+    "字段名称": "is_open_rctm_cnt",
+    "字段中文": "审核通过&正在招的信息数量",
+    "时效性": "实时",
+    "主题": "用户",
+    "特征描述": "审核通过且未结束的在招岗位数（is_check=2 且 is_end=0）",
+    "涉及sql逻辑": "SELECT user_id, COUNT(*) AS is_open_rctm_cnt FROM public.ods_gczdw_business_v2 WHERE is_check = 2 AND is_end = 0 GROUP BY user_id;"
   }
 ]
