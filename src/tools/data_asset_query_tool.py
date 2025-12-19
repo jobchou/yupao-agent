@@ -16,7 +16,7 @@ def query_data_assets(
     
     Args:
         query: 用户查询关键词，描述需要哪方面的数据
-        file_path: Excel文件路径，默认为assets/data_assets.xlsx
+        file_path: Excel文件路径，默认为assets/数据资产.xlsx
         runtime: LangChain工具运行时
     
     Returns:
@@ -25,7 +25,7 @@ def query_data_assets(
     workspace_path = os.getenv("COZE_WORKSPACE_PATH", "/workspace/projects")
     
     if file_path is None:
-        file_path = os.path.join(workspace_path, "assets/data_assets.xlsx")
+        file_path = os.path.join(workspace_path, "assets/数据资产.xlsx")
     else:
         # 如果传入的是相对路径，则基于工作空间解析
         if not os.path.isabs(file_path):
@@ -103,7 +103,7 @@ def list_data_assets(
     列出数据资产文件中的所有表名或主要字段。
     
     Args:
-        file_path: Excel文件路径，默认为assets/data_assets.xlsx
+        file_path: Excel文件路径，默认为assets/数据资产.xlsx
         runtime: LangChain工具运行时
     
     Returns:
@@ -112,7 +112,7 @@ def list_data_assets(
     workspace_path = os.getenv("COZE_WORKSPACE_PATH", "/workspace/projects")
     
     if file_path is None:
-        file_path = os.path.join(workspace_path, "assets/data_assets.xlsx")
+        file_path = os.path.join(workspace_path, "assets/数据资产.xlsx")
     else:
         if not os.path.isabs(file_path):
             file_path = os.path.join(workspace_path, file_path)
