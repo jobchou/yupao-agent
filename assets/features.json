@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "chinese_name": "近30天登录次数",
+    "english_name": "login_count_30d",
+    "definition": "用户在过去30天内成功登录平台的次数",
+    "sql_logic": "SELECT user_id, COUNT(*) as login_count FROM login_log WHERE login_time >= CURRENT_DATE - INTERVAL '30 days' GROUP BY user_id",
+    "category": "行为特征",
+    "tags": ["登录", "活跃度"]
+  },
+  {
+    "id": 2,
+    "chinese_name": "累计消费金额",
+    "english_name": "total_spent",
+    "definition": "用户历史累计消费总金额（人民币）",
+    "sql_logic": "SELECT user_id, SUM(amount) as total_spent FROM orders WHERE status = 'completed' GROUP BY user_id",
+    "category": "交易特征",
+    "tags": ["消费", "金额"]
+  },
+  {
+    "id": 3,
+    "chinese_name": "最近一次登录时间",
+    "english_name": "last_login_time",
+    "definition": "用户最近一次成功登录的时间戳",
+    "sql_logic": "SELECT user_id, MAX(login_time) as last_login_time FROM login_log GROUP BY user_id",
+    "category": "行为特征",
+    "tags": ["登录", "最近"]
+  },
+  {
+    "id": 4,
+    "chinese_name": "注册渠道",
+    "english_name": "register_channel",
+    "definition": "用户注册时来源渠道，如：应用商店、广告投放、自然流量等",
+    "sql_logic": "SELECT user_id, channel as register_channel FROM users",
+    "category": "属性特征",
+    "tags": ["渠道", "注册"]
+  },
+  {
+    "id": 5,
+    "chinese_name": "月活跃天数",
+    "english_name": "active_days_30d",
+    "definition": "用户在过去30天内有多少天有登录行为",
+    "sql_logic": "SELECT user_id, COUNT(DISTINCT DATE(login_time)) as active_days FROM login_log WHERE login_time >= CURRENT_DATE - INTERVAL '30 days' GROUP BY user_id",
+    "category": "行为特征",
+    "tags": ["活跃", "天数"]
+  }
+]
