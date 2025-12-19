@@ -10,6 +10,7 @@ from utils.helper.graph_helper import is_dev_env
 from tools.feature_query_tool import query_features
 from tools.database_query_tool import query_database
 from tools.report_understanding_tool import understand_report
+from tools.data_asset_query_tool import query_data_assets, list_data_assets
 
 LLM_CONFIG = "config/agent_llm_config.json"
 
@@ -55,7 +56,7 @@ def build_agent(ctx=None):
     )
     
     # 工具列表
-    tools = [query_features, query_database, understand_report]
+    tools = [query_features, query_database, understand_report, query_data_assets, list_data_assets]
     
     global in_memory_checkpointer
     agent = create_agent(
