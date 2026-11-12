@@ -1,3 +1,5 @@
 #!/bin/bash
- 
-pip freeze > requirements.txt
+set -eo pipefail
+
+echo "[pack] locking dependencies"
+uv lock
